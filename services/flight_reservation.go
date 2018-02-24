@@ -26,10 +26,10 @@ func GetFlightReservation(reservation_id string) (models.FlightReservation, erro
 	data, _ := ioutil.ReadAll(response.Body)
 	defer response.Body.Close()
 	// fmt.Println(string(data))
-	var flightReservations models.FlightReservation
-	errMarshall := json.Unmarshal([]byte(data), &flightReservations)
+	var flightReservation models.FlightReservation
+	errMarshall := json.Unmarshal([]byte(data), &flightReservation )
 	if errMarshall != nil {
 		return models.FlightReservation{}, errMarshall
 	}
-	return flightReservations, nil
+	return flightReservation, nil
 }

@@ -18,6 +18,7 @@ type Product struct {
 	Status string `json:"status,omitempty"`
 	Passengers []Passenger `json:"passengers,omitempty"`
 	Fare Fare `json:"fare,omitempty"`
+	FlightReservation FlightReservation
 }
 
 type Passenger struct {
@@ -51,7 +52,7 @@ type ExtraTax struct {
 
 type Contact struct {
 	Language string `json:"language,omitempty"`
-	email string `json:"email,omitempty"`
+	Email string `json:"email,omitempty"`
 	Telephone Telephone `json:"telephone,omitempty"`
 }
 

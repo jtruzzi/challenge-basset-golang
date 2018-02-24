@@ -10,9 +10,9 @@ import (
 	"os"
 )
 
-func GetReservation() (models.Reservation, error) {
+func GetReservation(reservationId  string) (models.Reservation, error) {
 	client := &http.Client{}
-	request, err := http.NewRequest("GET", "https://api.basset.ws/reservations/752690706?site=AR&channel=WEB", nil)
+	request, err := http.NewRequest("GET", "https://api.basset.ws/reservations/" + reservationId  + "?site=AR&channel=WEB", nil)
 
 	request.Header.Add("X-Api-Key", os.Getenv("X-Api-Key"))
 	request.Header.Add("x-client-id", os.Getenv("x-client-id"))
