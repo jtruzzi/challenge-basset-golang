@@ -18,7 +18,7 @@ type Product struct {
 	Status string `json:"status,omitempty"`
 	Passengers []Passenger `json:"passengers,omitempty"`
 	Fare Fare `json:"fare,omitempty"`
-	FlightReservation FlightReservation
+	FlightReservation FlightReservation `json:"flight_reservation,omitempty"`
 }
 
 type Passenger struct {

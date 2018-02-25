@@ -9,12 +9,12 @@ import (
 	"fmt"
 )
 
-func GetFlightReservation(reservation_id string) (models.FlightReservation, error) {
+func GetFlightReservation(reservationId string) (models.FlightReservation, error) {
 	client := &http.Client{}
-	request, err := http.NewRequest("GET", "https://api.basset.ws/flights/reservations/" + reservation_id + "?site=AR&channel=WEB", nil)
+	request, err := http.NewRequest("GET", "https://api.basset.ws/flights/reservations/" + reservationId  + "?site=AR&channel=WEB", nil)
 
-	request.Header.Add("X-Api-Key", os.Getenv("X-Api-Key"))
-	request.Header.Add("x-client-id", os.Getenv("x-client-id"))
+	request.Header.Add("X-Api-Key", os.Getenv("X_API_KEY"))
+	request.Header.Add("x-client-id", os.Getenv("X_CLIENT_ID"))
 
 	response, err := client.Do(request)
 
@@ -25,7 +25,6 @@ func GetFlightReservation(reservation_id string) (models.FlightReservation, erro
 
 	data, _ := ioutil.ReadAll(response.Body)
 	defer response.Body.Close()
-	// fmt.Println(string(data))
 	var flightReservation models.FlightReservation
 	errMarshall := json.Unmarshal([]byte(data), &flightReservation )
 	if errMarshall != nil {

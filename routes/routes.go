@@ -27,5 +27,5 @@ func NewRouter() *mux.Router {
 }
 
 var routes = Routes{
-	Route{"Index", "GET", "/reservation", ReservationRoute},
+	Route{"Index", "POST", "/reservations/{reservationId}/email-confirmation", EmailConfirmation},
 }

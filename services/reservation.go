@@ -14,11 +14,10 @@ func GetReservation(reservationId  string) (models.Reservation, error) {
 	client := &http.Client{}
 	request, err := http.NewRequest("GET", "https://api.basset.ws/reservations/" + reservationId  + "?site=AR&channel=WEB", nil)
 
-	request.Header.Add("X-Api-Key", os.Getenv("X-Api-Key"))
-	request.Header.Add("x-client-id", os.Getenv("x-client-id"))
+	request.Header.Add("X-Api-Key", os.Getenv("X_API_KEY"))
+	request.Header.Add("x-client-id", os.Getenv("X_CLIENT_ID"))
 
 	response, err := client.Do(request)
-
 	if err != nil {
 		fmt.Printf("The http request failed with error %s/n", err)
 		return models.Reservation{}, err

@@ -4,12 +4,13 @@ import (
 	"net/http"
 	"../services"
 	"github.com/gorilla/mux"
+	"encoding/json"
 )
 
 
-func ReservationRoute(w http.ResponseWriter, r *http.Request) {
+func EmailConfirmation(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	reservationId := params["reservation_id"]
+	reservationId := params["reservationId"]
 
 	reservation, err := services.GetReservation(reservationId )
 	if err != nil { panic(err) }
@@ -18,11 +19,10 @@ func ReservationRoute(w http.ResponseWriter, r *http.Request) {
 		if product.Type != "FLIGHT" { break }
 
 		flightReservation, err2 := services.GetFlightReservation(product.ReservationId)
-		if err2 != nil {
-			panic(err)
-			return
-		}
-		product.FlightReservation = flightReservation
+		if err2 != nil { panic(err); return }
+
+		services.SendEmailConfirmation(reservation, product, flightReservation)
+		json.NewEncoder(w).Encode(reservation.Products[0].FlightReservation)
 	}
 }
 
