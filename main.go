@@ -1,12 +1,13 @@
 package main
 
 import (
-	"os"
 	"fmt"
 	"log"
-	"net/http"
-	"./routes"
+	"github.com/julienschmidt/httprouter"
+	"./actions"
 	"github.com/joho/godotenv"
+	"net/http"
+	"os"
 )
 
 func main() {
@@ -14,11 +15,10 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+	router := httprouter.New()
 
-	router := routes.NewRouter()
-	fmt.Println("Server started on http://localhost:5000")
-	server := http.ListenAndServe(":" + os.Getenv("PORT"), router)
+	router.POST("/reservations/:reservationId/email-confirmation", actions.EmailConfirmation)
 
-	log.Fatal(server)
+	fmt.Println("Server started on http://localhost:" + os.Getenv("PORT"))
+	http.ListenAndServe(":" + os.Getenv("PORT"), router)
 }
-

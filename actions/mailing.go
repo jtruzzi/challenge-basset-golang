@@ -1,18 +1,15 @@
-package routes
+package actions
 
 import (
 	"net/http"
 	"../services"
-	"github.com/gorilla/mux"
 	"encoding/json"
+	"github.com/julienschmidt/httprouter"
 )
 
 
-func EmailConfirmation(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	reservationId := params["reservationId"]
-
-	reservation, err := services.GetReservation(reservationId )
+func EmailConfirmation(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	reservation, err := services.GetReservation(ps.ByName("reservationId") )
 	if err != nil { panic(err) }
 
 	for _, product := range reservation.Products {

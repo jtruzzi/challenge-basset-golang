@@ -31,6 +31,10 @@ type Passenger struct {
 	Nationality string `json:"nationality,omitempty"`
 }
 
+func (p Passenger) FullName() string {
+	return p.FirstName + " " + p.LastName
+}
+
 type Document struct {
 	Type string `json:"type,omitempty"`
 	Number string `json:"number,omitempty"`

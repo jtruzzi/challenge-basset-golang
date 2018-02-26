@@ -2,32 +2,38 @@ package services
 
 import (
 	"../models"
-	"github.com/keighl/mandrill"
+	"github.com/mostafah/mandrill"
 	"log"
 	"os"
 )
 
-var client *mandrill.Client = mandrill.ClientWithKey(os.Getenv("BASSET_MANDRILL_API_KEY"))
+func SendEmailConfirmation(reservation models.Reservation, product models.Product, flightReservation models.FlightReservation) ([]*mandrill.SendResult, error) {
+	mandrill.Key = os.Getenv("BASSET_MANDRILL_API_KEY")
+	// you can test your API key with Ping
+	pingErr := mandrill.Ping()
+	if pingErr != nil { log.Panic(pingErr) }
 
-func SendEmailConfirmation(
-		reservation models.Reservation,
-		product models.Product,
-		flightReservation models.FlightReservation,
-	) (
-		[]*mandrill.Response,
-		error,
-	) {
-	message := &mandrill.Message{}
-	message.AddRecipient("julio.truzzi@basset.la", "Bob Johnson", "to")
-	message.FromEmail = "reservas@tuhotelhoy.com"
-	message.FromName = "Tuhotelhoy.com"
-	message.Subject = "Confirmación de reserva"
-
-	templateContent := map[string]string{
-		"header": "Confirmación de reserva",
+	data := map[string]string{
+		"name": product.Passengers[0].FirstName,
+		"reservation_code": flightReservation.PNR,
 	}
-	responses, err := client.MessagesSendTemplate(message, "issued-ticket", templateContent)
-	log.Print(responses)
-	log.Print(err)
-	return responses, err
+	message := mandrill.NewMessageTo("julio.truzzi@gmail.com","Julio Truzzi")
+
+	attach := &mandrill.Attachment{
+		"application/pdf",
+		"vuelo.pdf",
+		GenerateFlightConfirmationPDF(reservation, product, flightReservation),
+	}
+	message.Attachments = []*mandrill.Attachment{attach}
+	response, err := message.SendTemplate("issued-ticket", data, false)
+
+	log.Println("Id", response[0].Id)
+	log.Println("Email", response[0].Email)
+	log.Println("Status", response[0].Status)
+	log.Println("RejectionReason", response[0].RejectionReason)
+
+	if err != nil { log.Panic(err) }
+
+	return response, err
 }
+
