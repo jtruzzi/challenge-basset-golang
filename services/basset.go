@@ -1,12 +1,12 @@
-package services
+package services // import "github.com/jtruzzi/basset-mailing-gateway/services"
 
 import (
+	"github.com/jtruzzi/basset-mailing-gateway/models"
 	"net/http"
 	"os"
 	"fmt"
 	"io/ioutil"
 	"encoding/json"
-	"../models"
 	"log"
 )
 

@@ -1,4 +1,4 @@
-package models
+package models // import "github.com/jtruzzi/basset-mailing-gateway/models"
 
 type ActivityLog struct {
 	ProductId string `json:"product_id,omitempty"`

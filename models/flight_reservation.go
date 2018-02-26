@@ -1,4 +1,4 @@
-package models
+package models // import "github.com/jtruzzi/basset-mailing-gateway/models"
 
 type FlightReservation struct {
 	Id string `json:"id,omitempty"`

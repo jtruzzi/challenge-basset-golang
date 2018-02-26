@@ -1,4 +1,4 @@
-package models
+package models // import "github.com/jtruzzi/basset-mailing-gateway/models"
 
 type Price struct {
 	Adults Adults `json:"adults,omitempty"`

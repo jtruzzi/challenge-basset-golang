@@ -1,4 +1,4 @@
-package models
+package models // import "github.com/jtruzzi/basset-mailing-gateway/models"
 
 type Carrier struct {
 	Code string `json:"code,omitempty"`

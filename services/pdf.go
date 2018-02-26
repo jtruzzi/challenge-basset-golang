@@ -1,7 +1,7 @@
-package services
+package services // import "github.com/jtruzzi/basset-mailing-gateway/services"
 
 import (
-	"../models"
+	"github.com/jtruzzi/basset-mailing-gateway/models"
 	"github.com/SebastiaanKlippert/go-wkhtmltopdf"
 	"bytes"
 	"strings"

@@ -1,4 +1,4 @@
-package models
+package models // import "github.com/jtruzzi/basset-mailing-gateway/models"
 
 type Fare struct {
 	Currency string `json:"currency,omitempty"`
