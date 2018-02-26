@@ -1,14 +1,13 @@
-package actions
+package handlers
 
 import (
 	"net/http"
 	"../services"
-	"encoding/json"
 	"github.com/julienschmidt/httprouter"
+	"encoding/json"
 )
 
-
-func EmailConfirmation(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func CreateTicketRelease(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	reservation, err := services.GetReservation(ps.ByName("reservationId") )
 	if err != nil { panic(err) }
 

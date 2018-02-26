@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"github.com/julienschmidt/httprouter"
-	"./actions"
+	"./handlers"
 	"github.com/joho/godotenv"
 	"net/http"
 	"os"
@@ -17,7 +17,7 @@ func main() {
 	}
 	router := httprouter.New()
 
-	router.POST("/reservations/:reservationId/email-confirmation", actions.EmailConfirmation)
+	router.POST("/reservations/:reservationId/email-confirmation", handlers.CreateTicketRelease)
 
 	fmt.Println("Server started on http://localhost:" + os.Getenv("PORT"))
 	http.ListenAndServe(":" + os.Getenv("PORT"), router)
