@@ -1,4 +1,4 @@
-package models // import "github.com/jtruzzi/basset-mailing-gateway/models"
+package models
 
 type Ticket struct {
 	Number string `json:"number,omitempty"`

@@ -1,4 +1,4 @@
-package models // import "github.com/jtruzzi/basset-mailing-gateway/models"
+package models
 
 type Telephone struct {
 	Type string `json:"type,omitempty"`

@@ -1,7 +1,7 @@
-package services // import "github.com/jtruzzi/basset-mailing-gateway/services"
+package services
 
 import (
-	"github.com/jtruzzi/basset-mailing-gateway/models"
+	"../models"
 	"github.com/mostafah/mandrill"
 	"log"
 	"os"

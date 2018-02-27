@@ -1,8 +1,8 @@
-package handlers // import "github.com/jtruzzi/basset-mailing-gateway/handlers"
+package handlers
 
 import (
 	"net/http"
-	"github.com/jtruzzi/basset-mailing-gateway/services"
+	"../services"
 	"github.com/julienschmidt/httprouter"
 	"encoding/json"
 )

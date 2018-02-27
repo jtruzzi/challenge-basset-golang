@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"github.com/julienschmidt/httprouter"
-	"github.com/jtruzzi/basset-mailing-gateway/handlers"
+	"./handlers"
 	"github.com/joho/godotenv"
 	"net/http"
 	"os"

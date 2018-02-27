@@ -1,3 +1,0 @@
-FROM golang:1.8
-COPY . .
-RUN go get -d -v ./...
