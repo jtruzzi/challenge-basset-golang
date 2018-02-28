@@ -7,24 +7,37 @@ import (
 	"os"
 )
 
-func SendEmailConfirmation(reservation models.Reservation, product models.Product, flightReservation models.FlightReservation) ([]*mandrill.SendResult, error) {
+func SendEmailConfirmation(reservation models.Reservation, flightReservations []models.FlightReservation) ([]*mandrill.SendResult, error) {
+
+	// Loop over flightReservations and Generate attachments contents as strings (base64) (Maybe Upload PDF to S3)
+	var attachments []*mandrill.Attachment
+	for _, flightReservation := range flightReservations {
+		pdfContent := GenerateFlightConfirmationPDF(reservation, flightReservation)
+		attachment := &mandrill.Attachment{
+			Mime:    "application/pdf",
+			Name:    "vuvueloelo.pdf",
+			Content: pdfContent,
+		}
+		attachments = append(attachments, attachment)
+	}
+
+	//
+	// Send Email Confirmation (receiving attachments contents
+	// Persist new ticket release in database
+
+
 	mandrill.Key = os.Getenv("BASSET_MANDRILL_API_KEY")
 	// you can test your API key with Ping
 	pingErr := mandrill.Ping()
 	if pingErr != nil { log.Panic(pingErr) }
 
 	data := map[string]string{
-		"name": product.Passengers[0].FirstName,
-		"reservation_code": flightReservation.PNR,
+		"name": flightReservations[0].Passengers[0].FirstName,
 	}
 	message := mandrill.NewMessageTo("julio.truzzi@gmail.com","Julio Truzzi")
 
-	attach := &mandrill.Attachment{
-		"application/pdf",
-		"vuelo.pdf",
-		GenerateFlightConfirmationPDF(reservation, product, flightReservation),
-	}
-	message.Attachments = []*mandrill.Attachment{attach}
+
+	message.Attachments = attachments
 	response, err := message.SendTemplate("issued-ticket", data, false)
 
 	log.Println("Id", response[0].Id)

@@ -12,3 +12,10 @@ type FlightReservation struct {
 	Status string `json:"status,omitempty"`
 	Tickets []Ticket `json:"tickets,omitempty"`
 }
+
+func (flightReservation FlightReservation) HasIssuedTicket() bool {
+	for _, ticket := range flightReservation.Tickets {
+		if ticket.Issued() { return true }
+	}
+	return false
+}

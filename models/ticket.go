@@ -7,3 +7,7 @@ type Ticket struct {
 	PassengerType string `json:"passenger_type,omitempty"`
 	Status string `json:"status,omitempty"`
 }
+
+func (ticket Ticket) Issued() bool {
+	return ticket.Status == "ISSUED"
+}

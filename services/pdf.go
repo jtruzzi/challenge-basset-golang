@@ -10,7 +10,10 @@ import (
 	"encoding/base64"
 )
 
-func GenerateFlightConfirmationPDF(reservation models.Reservation, product models.Product, flightReservation models.FlightReservation) string {
+func GenerateFlightConfirmationPDF(reservation models.Reservation, flightReservation models.FlightReservation) string {
+	// Obtain templates for header and footer from mandrill
+	// Generate body with local template
+
 	generator, err := wkhtmltopdf.NewPDFGenerator()
 	if err != nil {
 		log.Fatal(err)
