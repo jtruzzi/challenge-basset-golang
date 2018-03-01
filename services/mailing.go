@@ -7,9 +7,31 @@ import (
 	"os"
 )
 
+// TODO: Receive mail provider as a parameters as interface
 func SendEmailConfirmation(reservation models.Reservation, products []models.Product) ([]*mandrill.SendResult, error) {
+	mandrill.Key = os.Getenv("BASSET_MANDRILL_API_KEY")
+	pingErr := mandrill.Ping()
+	if pingErr != nil { log.Panic(pingErr) }
 
-	// Loop over flightReservations and Generate attachments contents as strings (base64) (Maybe Upload PDF to S3)
+	message := mandrill.NewMessageTo("julio.truzzi@gmail.com","Julio Truzzi")
+
+	message.Attachments = generateAttachments(products, reservation)
+
+	// TODO: Persist new ticket release in database
+
+	message.AddGlobalMergeVars(map[string]interface{} {
+		"name": products[0].Passengers[0].FirstName,
+	})
+	message.MergeLanguage = "handlebars"
+
+	response, err := message.SendTemplate("issued-ticket-email", nil, false)
+
+	if err != nil { log.Panic(err) }
+
+	return response, err
+}
+
+func generateAttachments(products []models.Product, reservation models.Reservation) []*mandrill.Attachment {
 	var attachments []*mandrill.Attachment
 	for _, product := range products {
 		pdfContent := GenerateConfirmationPDF(reservation, product)
@@ -20,32 +42,6 @@ func SendEmailConfirmation(reservation models.Reservation, products []models.Pro
 		}
 		attachments = append(attachments, attachment)
 	}
-
-	//
-	// Send Email Confirmation (receiving attachments contents
-	// Persist new ticket release in database
-
-
-	mandrill.Key = os.Getenv("BASSET_MANDRILL_API_KEY")
-	// you can test your API key with Ping
-	pingErr := mandrill.Ping()
-	if pingErr != nil { log.Panic(pingErr) }
-
-	data := map[string]string{
-		"name": products[0].Passengers[0].FirstName,
-	}
-	message := mandrill.NewMessageTo("julio.truzzi@gmail.com","Julio Truzzi")
-
-
-	message.Attachments = attachments
-	response, err := message.SendTemplate("issued-ticket", data, false)
-
-	log.Println("Id", response[0].Id)
-	log.Println("Email", response[0].Email)
-	log.Println("Status", response[0].Status)
-	log.Println("RejectionReason", response[0].RejectionReason)
-
-	if err != nil { log.Panic(err) }
-
-	return response, err
+	// TODO: Upload to S3
+	return attachments
 }

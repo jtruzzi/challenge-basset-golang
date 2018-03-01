@@ -24,9 +24,6 @@ type MandrillTemplateResponse struct {
 }
 
 func GenerateConfirmationPDF(reservation models.Reservation, product models.Product) string {
-	// Obtain templates for header and footer from mandrill
-	// Generate body with local template
-
 	generator, err := wkhtmltopdf.NewPDFGenerator()
 	if err != nil {
 		log.Fatal(err)
