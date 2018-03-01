@@ -10,7 +10,7 @@ import (
 	"encoding/base64"
 )
 
-func GenerateFlightConfirmationPDF(reservation models.Reservation, flightReservation models.FlightReservation) string {
+func GenerateConfirmationPDF(reservation models.Reservation, product models.Product) string {
 	// Obtain templates for header and footer from mandrill
 	// Generate body with local template
 
@@ -18,12 +18,13 @@ func GenerateFlightConfirmationPDF(reservation models.Reservation, flightReserva
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	generator.Dpi.Set(600)
 	generator.NoCollate.Set(false)
 	generator.PageSize.Set(wkhtmltopdf.PageSizeA4)
 	generator.MarginBottom.Set(40)
 
-	tpl, err := template.ParseFiles("templates/flights/issued-ticket.html")
+	tpl, err := template.ParseFiles("templates/" + product.Type + "/issued-ticket.html")
 	if err != nil {
 		log.Fatalln(err)
 	}

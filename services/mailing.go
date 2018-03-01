@@ -7,15 +7,15 @@ import (
 	"os"
 )
 
-func SendEmailConfirmation(reservation models.Reservation, flightReservations []models.FlightReservation) ([]*mandrill.SendResult, error) {
+func SendEmailConfirmation(reservation models.Reservation, products []models.Product) ([]*mandrill.SendResult, error) {
 
 	// Loop over flightReservations and Generate attachments contents as strings (base64) (Maybe Upload PDF to S3)
 	var attachments []*mandrill.Attachment
-	for _, flightReservation := range flightReservations {
-		pdfContent := GenerateFlightConfirmationPDF(reservation, flightReservation)
+	for _, product := range products {
+		pdfContent := GenerateConfirmationPDF(reservation, product)
 		attachment := &mandrill.Attachment{
 			Mime:    "application/pdf",
-			Name:    "vuvueloelo.pdf",
+			Name:    product.Type + ".pdf",
 			Content: pdfContent,
 		}
 		attachments = append(attachments, attachment)
@@ -32,7 +32,7 @@ func SendEmailConfirmation(reservation models.Reservation, flightReservations []
 	if pingErr != nil { log.Panic(pingErr) }
 
 	data := map[string]string{
-		"name": flightReservations[0].Passengers[0].FirstName,
+		"name": products[0].Passengers[0].FirstName,
 	}
 	message := mandrill.NewMessageTo("julio.truzzi@gmail.com","Julio Truzzi")
 
@@ -49,4 +49,3 @@ func SendEmailConfirmation(reservation models.Reservation, flightReservations []
 
 	return response, err
 }
-

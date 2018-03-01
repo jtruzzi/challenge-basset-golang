@@ -12,7 +12,7 @@ func CreateTicketRelease(w http.ResponseWriter, r *http.Request, ps httprouter.P
 	reservation, err := services.GetReservation(ps.ByName("reservationId") )
 	if err != nil { panic(err) }
 
-	var flightReservations []models.FlightReservation
+	var products []models.Product
 
 	for _, product := range reservation.Products {
 		if product.Type != "FLIGHT" { break }
@@ -21,13 +21,14 @@ func CreateTicketRelease(w http.ResponseWriter, r *http.Request, ps httprouter.P
 		if err2 != nil { panic(err); return }
 
 		if flightReservation.HasIssuedTicket() {
-			flightReservations  = append(flightReservations, flightReservation)
+			product.FlightReservation = flightReservation
+			products  = append(products, product)
 		}
 	}
 
-	if len(flightReservations) == 0 { return }
+	if len(products) == 0 { return }
 
-	services.SendEmailConfirmation(reservation, flightReservations)
+	services.SendEmailConfirmation(reservation, products)
 	json.NewEncoder(w).Encode(reservation.Products[0].FlightReservation)
 
 }
