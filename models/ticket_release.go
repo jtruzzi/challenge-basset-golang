@@ -1,7 +1,6 @@
 package models
 
 import (
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
@@ -15,16 +14,8 @@ type TicketRelease struct {
 	S3Url string
 }
 
-
-var sess, _ = session.NewSession(&aws.Config{
-Region: aws.String("sa-east-1"),
-})
-
-var svc = dynamodb.New(sess)
-
-
 func GetTicketRelease(itemId string) (TicketRelease, error) {
-	result, err := svc.GetItem(&dynamodb.GetItemInput{
+	result, err := db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String("TicketRelease"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"ItemId": {
@@ -64,7 +55,7 @@ func CreateTicketRelease(itemId string, released bool, s3Url string) (TicketRele
 		TableName: aws.String("TicketRelease"),
 	}
 
-	_, err = svc.PutItem(input)
+	_, err = db.PutItem(input)
 
 	if err != nil {
 		fmt.Println("Got error calling PutItem:")

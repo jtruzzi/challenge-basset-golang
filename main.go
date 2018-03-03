@@ -5,6 +5,7 @@ import (
 	"log"
 	"github.com/julienschmidt/httprouter"
 	"./handlers"
+	"./models"
 	"github.com/joho/godotenv"
 	"net/http"
 	"os"
@@ -15,6 +16,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+	models.InitDB()
 	router := httprouter.New()
 
 	router.POST("/reservations/:reservationId/email-confirmation", handlers.CreateTicketRelease)
