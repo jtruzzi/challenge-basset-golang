@@ -15,8 +15,6 @@ import (
 	"encoding/json"
 )
 
-
-
 type MandrillTemplateResponse struct {
 	Slug string `json:"type"`
 	Name string `json:"firstname"`
@@ -24,46 +22,41 @@ type MandrillTemplateResponse struct {
 }
 
 func GenerateConfirmationPDF(reservation models.Reservation, product models.Product) string {
-	generator, err := wkhtmltopdf.NewPDFGenerator()
-	if err != nil {
-		log.Fatal(err)
-	}
+	pdfGenerator, _ := wkhtmltopdf.NewPDFGenerator()
+	pdfGenerator.Dpi.Set(600)
+	pdfGenerator.NoCollate.Set(false)
+	pdfGenerator.PageSize.Set(wkhtmltopdf.PageSizeA4)
+	pdfGenerator.MarginBottom.Set(40)
 
-	generator.Dpi.Set(600)
-	generator.NoCollate.Set(false)
-	generator.PageSize.Set(wkhtmltopdf.PageSizeA4)
-	generator.MarginBottom.Set(40)
+	issuedTicketHeader, _ := template.ParseFiles(fmt.Sprintf("templates/%s/issued-ticket.gohtml", strings.ToLower(product.Type)))
 
-	localTemplate, err := template.ParseFiles("templates/" + strings.ToLower(product.Type) + "/issued-ticket.gohtml")
-	if err != nil {
-		log.Fatalln(err)
-	}
+	buffer := new(bytes.Buffer)
 
-	localTemplateBuffer := new(bytes.Buffer)
-
-	err = localTemplate.Execute(localTemplateBuffer, map[string]interface{} {
+	err := issuedTicketHeader.Execute(buffer, map[string]interface{} {
 		"Header": fetchTemplate("issued-ticket-pdf-header"),
 		"Footer": fetchTemplate("issued-ticket-pdf-footer"),
 		"Product": product,
 		"Reservation": reservation,
 	})
 
-	if err != nil { log.Println(err) }
-
-	generator.AddPage(wkhtmltopdf.NewPageReader(strings.NewReader(localTemplateBuffer.String())))
-
-	err = generator.Create()
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return ""
 	}
 
-	return base64.StdEncoding.EncodeToString(generator.Bytes())
+	pdfGenerator.AddPage(wkhtmltopdf.NewPageReader(strings.NewReader(buffer.String())))
+
+	err = pdfGenerator.Create()
+	if err != nil { log.Fatal(err) }
+
+	return base64.StdEncoding.EncodeToString(pdfGenerator.Bytes())
 }
 
 
 func fetchTemplate(name string) template.HTML {
 	client := &http.Client{}
 	var body = []byte(`{"key":"`+ os.Getenv("BASSET_MANDRILL_API_KEY") +`", "name": "`+name+`"}`)
+
 	request, err := http.NewRequest("POST", "https://mandrillapp.com/api/1.0/templates/info.json", bytes.NewBuffer(body))
 	response, err := client.Do(request)
 	if err != nil {

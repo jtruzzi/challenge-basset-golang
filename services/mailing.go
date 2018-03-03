@@ -17,8 +17,6 @@ func SendEmailConfirmation(reservation models.Reservation, products []models.Pro
 
 	message.Attachments = generateAttachments(products, reservation)
 
-	// TODO: Persist new ticket release in database
-
 	message.AddGlobalMergeVars(map[string]interface{} {
 		"name": products[0].Passengers[0].FirstName,
 	})
@@ -34,14 +32,28 @@ func SendEmailConfirmation(reservation models.Reservation, products []models.Pro
 func generateAttachments(products []models.Product, reservation models.Reservation) []*mandrill.Attachment {
 	var attachments []*mandrill.Attachment
 	for _, product := range products {
-		pdfContent := GenerateConfirmationPDF(reservation, product)
-		attachment := &mandrill.Attachment{
-			Mime:    "application/pdf",
-			Name:    product.Type + ".pdf",
-			Content: pdfContent,
+		// TODO: Persist new ticket release in database
+		ticketRelease, _ := models.GetTicketRelease(product.ItemId)
+		if ticketRelease.Released != true {
+			pdfContent := GenerateConfirmationPDF(reservation, product)
+
+			attachment := &mandrill.Attachment{
+				Mime:    "application/pdf",
+				Name:    product.Type + ".pdf",
+				Content: pdfContent,
+			}
+			attachments = append(attachments, attachment)
+
+			s3Url := saveAttachmentToS3(pdfContent)
+
+			ticketRelease, _ = models.CreateTicketRelease(product.ItemId, true, s3Url)
 		}
-		attachments = append(attachments, attachment)
 	}
-	// TODO: Upload to S3
+
 	return attachments
+}
+
+func saveAttachmentToS3(pdfContent string) string {
+	// TODO: Upload to S3
+	return "dummy_s3_url"
 }
