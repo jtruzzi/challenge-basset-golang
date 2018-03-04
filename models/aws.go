@@ -8,10 +8,9 @@ import (
 
 var db *dynamodb.DynamoDB
 
-func InitDB() {
-	var sess, _ = session.NewSession(&aws.Config{
+func InitAwsServices() {
+	var awsSession, _ = session.NewSession(&aws.Config{
 		Region: aws.String("sa-east-1"),
 	})
-
-	db = dynamodb.New(sess)
+	db = dynamodb.New(awsSession)
 }

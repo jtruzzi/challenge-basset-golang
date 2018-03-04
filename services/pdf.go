@@ -7,7 +7,6 @@ import (
 	"strings"
 	"log"
 	"html/template"
-	"encoding/base64"
 	"net/http"
 	"os"
 	"fmt"
@@ -21,7 +20,7 @@ type MandrillTemplateResponse struct {
 	PublishCode string `json:"publish_code"`
 }
 
-func GenerateConfirmationPDF(reservation models.Reservation, product models.Product) string {
+func GenerateConfirmationPDF(reservation models.Reservation, product models.Product) []byte {
 	pdfGenerator, _ := wkhtmltopdf.NewPDFGenerator()
 	pdfGenerator.Dpi.Set(600)
 	pdfGenerator.NoCollate.Set(false)
@@ -41,7 +40,7 @@ func GenerateConfirmationPDF(reservation models.Reservation, product models.Prod
 
 	if err != nil {
 		log.Println(err)
-		return ""
+		return []byte{}
 	}
 
 	pdfGenerator.AddPage(wkhtmltopdf.NewPageReader(strings.NewReader(buffer.String())))
@@ -49,7 +48,7 @@ func GenerateConfirmationPDF(reservation models.Reservation, product models.Prod
 	err = pdfGenerator.Create()
 	if err != nil { log.Fatal(err) }
 
-	return base64.StdEncoding.EncodeToString(pdfGenerator.Bytes())
+	return pdfGenerator.Bytes()
 }
 
 

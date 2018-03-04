@@ -5,6 +5,8 @@ import (
 	"github.com/mostafah/mandrill"
 	"log"
 	"os"
+	"encoding/base64"
+	"strings"
 )
 
 // TODO: Receive mail provider as a parameters as interface
@@ -32,28 +34,27 @@ func SendEmailConfirmation(reservation models.Reservation, products []models.Pro
 func generateAttachments(products []models.Product, reservation models.Reservation) []*mandrill.Attachment {
 	var attachments []*mandrill.Attachment
 	for _, product := range products {
-		// TODO: Persist new ticket release in database
 		ticketRelease, _ := models.GetTicketRelease(product.ItemId)
 		if ticketRelease.Released != true {
-			pdfContent := GenerateConfirmationPDF(reservation, product)
+			var pdfBytes []byte
+			if ticketRelease.S3Url != "" {
+				pdfBytes, _ = GetAttachmentFromS3(ticketRelease.S3Url)
+			} else {
+				pdfBytes = GenerateConfirmationPDF(reservation, product)
+			}
 
 			attachment := &mandrill.Attachment{
 				Mime:    "application/pdf",
-				Name:    product.Type + ".pdf",
-				Content: pdfContent,
+				Name:    product.FlightReservation.PNR + ".pdf",
+				Content: base64.StdEncoding.EncodeToString(pdfBytes),
 			}
 			attachments = append(attachments, attachment)
 
-			s3Url := saveAttachmentToS3(pdfContent)
+			s3Url := SaveAttachmentToS3(attachment.Name, strings.ToLower(product.Type), pdfBytes)
 
 			ticketRelease, _ = models.CreateTicketRelease(product.ItemId, true, s3Url)
 		}
 	}
 
 	return attachments
-}
-
-func saveAttachmentToS3(pdfContent string) string {
-	// TODO: Upload to S3
-	return "dummy_s3_url"
 }
