@@ -1,17 +1,18 @@
 package models
 
 import (
+	"fmt"
+	"log"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
-	"log"
-	"fmt"
 )
 
 type TicketRelease struct {
-	ItemId string
+	ItemId   string
 	Released bool
-	S3Url string
+	S3Url    string
 }
 
 func GetTicketRelease(itemId string) (TicketRelease, error) {
@@ -28,30 +29,23 @@ func GetTicketRelease(itemId string) (TicketRelease, error) {
 		return TicketRelease{}, err
 	}
 
-	item := TicketRelease{}
+	item := TicketRelease{ItemId: itemId}
 
 	err = dynamodbattribute.UnmarshalMap(result.Item, &item)
 
 	if err != nil {
-		log.Println("Failed to unmarshal Record, %v", err)
-		return TicketRelease{}, err
+		log.Println("Failed to unmarshal Record", err)
+		return item, err
 	}
 
 	return item, nil
 }
 
-
-func CreateTicketRelease(itemId string, released bool, s3Url string) (TicketRelease, error) {
-	item := TicketRelease{
-		ItemId: itemId,
-		Released: released,
-		S3Url: s3Url,
-	}
-
+func (item *TicketRelease) Save() error {
 	av, err := dynamodbattribute.MarshalMap(item)
 
 	input := &dynamodb.PutItemInput{
-		Item: av,
+		Item:      av,
 		TableName: aws.String("TicketRelease"),
 	}
 
@@ -60,8 +54,8 @@ func CreateTicketRelease(itemId string, released bool, s3Url string) (TicketRele
 	if err != nil {
 		fmt.Println("Got error calling PutItem:")
 		fmt.Println(err.Error())
-		return TicketRelease{}, err
+		return err
 	}
 
-	return item, nil
+	return nil
 }

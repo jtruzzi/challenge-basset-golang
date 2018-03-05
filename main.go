@@ -3,12 +3,13 @@ package main
 import (
 	"fmt"
 	"log"
-	"github.com/julienschmidt/httprouter"
+	"net/http"
+	"os"
+
 	"./handlers"
 	"./models"
 	"github.com/joho/godotenv"
-	"net/http"
-	"os"
+	"github.com/julienschmidt/httprouter"
 )
 
 func main() {
@@ -22,5 +23,5 @@ func main() {
 	router.POST("/reservations/:reservationId/email-confirmation", handlers.CreateTicketRelease)
 
 	fmt.Println("Server started on port " + os.Getenv("PORT"))
-	http.ListenAndServe(":" + os.Getenv("PORT"), router)
+	http.ListenAndServe(":"+os.Getenv("PORT"), router)
 }

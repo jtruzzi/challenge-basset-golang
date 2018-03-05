@@ -1,47 +1,48 @@
 package services
 
 import (
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/url"
-	"io/ioutil"
+
+	"../models"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
-func SaveAttachmentToS3(fileName string, folder string, content []byte) string {
+func SaveAttachmentToS3(attachment models.Attachment) string {
 	// TODO: Upload to S3
 
 	var awsSession, _ = session.NewSession(&aws.Config{
 		Region: aws.String("sa-east-1"),
 	})
 
-
 	uploader := s3manager.NewUploader(awsSession)
 	result, err := uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String("basset-mailing-gateway"),
-		Key:    aws.String(folder + "/" + fileName),
-		Body:   bytes.NewReader(content),
+		Key:    aws.String(attachment.Path),
+		Body:   bytes.NewReader(attachment.Content),
 	})
 	if err != nil {
 		fmt.Println("Error uploading file", err)
 		return ""
 	}
 
-	log.Println("Successfully uploaded %s", fileName )
+	log.Println("Successfully uploaded %v", attachment.Path)
 	return result.Location
 }
 
-func GetAttachmentFromS3(location string) ([]byte, error) {
+func GetAttachmentFromS3(location string) (models.Attachment, error) {
 	var awsSession, _ = session.NewSession(&aws.Config{
 		Region: aws.String("sa-east-1"),
 	})
 	s3Svc := s3.New(awsSession)
 
-	u,_ := url.Parse(location)
+	u, _ := url.Parse(location)
 	fmt.Printf("proto: %q, bucket: %q, key: %q", u.Scheme, u.Host, u.Path)
 
 	result, err := s3Svc.GetObject(&s3.GetObjectInput{
@@ -54,5 +55,11 @@ func GetAttachmentFromS3(location string) ([]byte, error) {
 	}
 
 	defer result.Body.Close()
-	return ioutil.ReadAll(result.Body)
+	content, _ := ioutil.ReadAll(result.Body)
+
+	return models.Attachment{
+		Mime:    "application/pdf",
+		Path:    u.Path,
+		Content: content,
+	}, nil
 }

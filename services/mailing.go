@@ -1,60 +1,70 @@
 package services
 
 import (
-	"../models"
-	"github.com/mostafah/mandrill"
+	"errors"
 	"log"
 	"os"
-	"encoding/base64"
-	"strings"
+
+	"../models"
+	"github.com/mostafah/mandrill"
 )
 
-// TODO: Receive mail provider as a parameters as interface
-func SendEmailConfirmation(reservation models.Reservation, products []models.Product) ([]*mandrill.SendResult, error) {
+func SendEmailConfirmation(reservation models.Reservation, products []models.Product, resend bool) ([]*mandrill.SendResult, error) {
 	mandrill.Key = os.Getenv("BASSET_MANDRILL_API_KEY")
 	pingErr := mandrill.Ping()
-	if pingErr != nil { log.Panic(pingErr) }
+	if pingErr != nil {
+		log.Panic(pingErr)
+	}
 
-	message := mandrill.NewMessageTo("julio.truzzi@gmail.com","Julio Truzzi")
-
-	message.Attachments = generateAttachments(products, reservation)
-
-	message.AddGlobalMergeVars(map[string]interface{} {
-		"name": products[0].Passengers[0].FirstName,
-	})
-	message.MergeLanguage = "handlebars"
-
-	response, err := message.SendTemplate("issued-ticket-email", nil, false)
-
-	if err != nil { log.Panic(err) }
-
-	return response, err
-}
-
-func generateAttachments(products []models.Product, reservation models.Reservation) []*mandrill.Attachment {
 	var attachments []*mandrill.Attachment
 	for _, product := range products {
-		ticketRelease, _ := models.GetTicketRelease(product.ItemId)
-		if ticketRelease.Released != true {
-			var pdfBytes []byte
-			if ticketRelease.S3Url != "" {
-				pdfBytes, _ = GetAttachmentFromS3(ticketRelease.S3Url)
-			} else {
-				pdfBytes = GenerateConfirmationPDF(reservation, product)
-			}
-
-			attachment := &mandrill.Attachment{
-				Mime:    "application/pdf",
-				Name:    product.FlightReservation.PNR + ".pdf",
-				Content: base64.StdEncoding.EncodeToString(pdfBytes),
-			}
+		attachment := generateAttachments(product, reservation, resend)
+		if (attachment != nil) {
 			attachments = append(attachments, attachment)
-
-			s3Url := SaveAttachmentToS3(attachment.Name, strings.ToLower(product.Type), pdfBytes)
-
-			ticketRelease, _ = models.CreateTicketRelease(product.ItemId, true, s3Url)
 		}
 	}
 
-	return attachments
+	// TODO: Uncomment line to use actual reservation email
+	//email := reservation.Contact.Email
+	email := "julio.truzzi@gmail.com"
+	if len(attachments) > 0 {
+		message := mandrill.NewMessageTo(email, "")
+
+		message.Attachments = attachments
+		globalVars := map[string]interface{}{
+			"name": products[0].Passengers[0].FirstName,
+		}
+		message.AddGlobalMergeVars(globalVars)
+		message.MergeLanguage = "handlebars"
+
+		return message.SendTemplate("issued-ticket-email", nil, false)
+	}
+	return nil, errors.New("no attachments to be sent")
+}
+
+func generateAttachments(product models.Product, reservation models.Reservation, resend bool) *mandrill.Attachment {
+	ticketRelease, _ := models.GetTicketRelease(product.ItemId)
+	if resend == true || ticketRelease.Released != true {
+		var attachment models.Attachment
+
+		if ticketRelease.S3Url != "" {
+			attachment, _ = GetAttachmentFromS3(ticketRelease.S3Url)
+		} else {
+			attachment, _ = GenerateConfirmationPDF(reservation, product)
+			ticketRelease.S3Url = SaveAttachmentToS3(attachment)
+			ticketRelease.Released = true
+			ticketRelease.Save()
+		}
+
+		return generateMandrillAttachment(attachment)
+	}
+	return nil
+}
+
+func generateMandrillAttachment(a models.Attachment) *mandrill.Attachment {
+	return &mandrill.Attachment{
+		Mime:    a.Mime,
+		Name:    a.Name(),
+		Content: a.Base64Content(),
+	}
 }
