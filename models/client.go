@@ -13,6 +13,7 @@ type Client struct {
 	MandrillApiKey string
 }
 
+// GetClient: Get client information and configuration in DB
 func GetClient(clientId string) (Client, error) {
 	result, err := db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String("Client"),

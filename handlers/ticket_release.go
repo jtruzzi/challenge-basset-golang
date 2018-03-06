@@ -10,44 +10,26 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// CreateTicketRelease: Endpoint for releasing product tickets to the user by email
 func CreateTicketRelease(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-
 	client, err := models.GetClient(r.Header.Get("x-client-id"))
 	apiKey := r.Header.Get("X-Api-Key")
-
-	reservation, err := services.GetReservation(ps.ByName("reservationId"), apiKey, client.ClientId)
-	if err != nil {
-		panic(err)
-	}
-
 	resend, _ := strconv.ParseBool(r.URL.Query().Get("resend"))
 
-	var products []models.Product
+	reservation, err := services.GetReservationWithFlightReservations(ps.ByName("reservationId"), apiKey, client.ClientId)
 
-	for _, product := range reservation.Products {
-		if product.Type != "FLIGHT" {
-			break
-		}
-
-		flightReservation, err := services.GetFlightReservation(product.ReservationId, apiKey, client.ClientId)
-		if err != nil {
-			panic(err)
-			break
-		}
-
-		if flightReservation.HasIssuedTicket() {
-			product.FlightReservation = flightReservation
-			products = append(products, product)
-		}
-	}
-
-	if len(products) == 0 {
+	if err != nil {
 		return
 	}
 
-	reponse, err := services.SendEmailConfirmation(reservation, products, resend, client)
+	if len(reservation.Products) == 0 {
+		return
+	}
+
+	response, err := services.SendEmailConfirmation(reservation, resend, client)
 	if err != nil {
 		json.NewEncoder(w).Encode(err)
+		return
 	}
-	json.NewEncoder(w).Encode(reponse)
+	json.NewEncoder(w).Encode(response)
 }

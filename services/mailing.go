@@ -3,11 +3,13 @@ package services
 import (
 	"errors"
 	"log"
+
 	"../models"
 	"github.com/mostafah/mandrill"
 )
 
-func SendEmailConfirmation(reservation models.Reservation, products []models.Product, resend bool, client models.Client) ([]*mandrill.SendResult, error) {
+// SendEmailConfirmation: Sends email configuration with attachments for all issued products
+func SendEmailConfirmation(reservation models.Reservation, resend bool, client models.Client) ([]*mandrill.SendResult, error) {
 	mandrill.Key = client.MandrillApiKey
 	pingErr := mandrill.Ping()
 	if pingErr != nil {
@@ -15,9 +17,9 @@ func SendEmailConfirmation(reservation models.Reservation, products []models.Pro
 	}
 
 	var attachments []*mandrill.Attachment
-	for _, product := range products {
-		attachment := generateAttachments(product, reservation, resend, client)
-		if (attachment != nil) {
+	for _, product := range reservation.Products {
+		attachment := generateAttachment(product, reservation, resend, client)
+		if attachment != nil {
 			attachments = append(attachments, attachment)
 		}
 	}
@@ -30,9 +32,9 @@ func SendEmailConfirmation(reservation models.Reservation, products []models.Pro
 
 		message.Attachments = attachments
 		globalVars := map[string]interface{}{
-			"name":             products[0].Passengers[0].FirstName,
+			"name":             reservation.Products[0].Passengers[0].FirstName,
 			"client_name":      client.Name,
-			"reservation_code": products[0].FlightReservation.PNR,
+			"reservation_code": reservation.Products[0].FlightReservation.PNR,
 		}
 		message.AddGlobalMergeVars(globalVars)
 		message.MergeLanguage = "handlebars"
@@ -42,7 +44,8 @@ func SendEmailConfirmation(reservation models.Reservation, products []models.Pro
 	return nil, errors.New("no attachments to be sent")
 }
 
-func generateAttachments(product models.Product, reservation models.Reservation, resend bool, client models.Client) *mandrill.Attachment {
+// generateAttachments: Generates mandrill attachment based on a given product
+func generateAttachment(product models.Product, reservation models.Reservation, resend bool, client models.Client) *mandrill.Attachment {
 	ticketRelease, _ := models.GetTicketRelease(product.ItemId)
 	if resend == true || ticketRelease.Released != true {
 		var attachment models.Attachment
@@ -61,6 +64,7 @@ func generateAttachments(product models.Product, reservation models.Reservation,
 	return nil
 }
 
+// generateMandrillAttachment: Transform a basset attachment into a mandrill attachment
 func generateMandrillAttachment(a models.Attachment) *mandrill.Attachment {
 	return &mandrill.Attachment{
 		Mime:    a.Mime,

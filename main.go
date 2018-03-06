@@ -3,13 +3,12 @@ package main
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 
-	"./handlers"
 	"./models"
+	"./routes"
 	"github.com/joho/godotenv"
-	"github.com/julienschmidt/httprouter"
+	"net/http"
 )
 
 func main() {
@@ -19,9 +18,6 @@ func main() {
 
 	models.InitAwsServices()
 
-	router := httprouter.New()
-	router.POST("/reservations/:reservationId/email-confirmation", handlers.CreateTicketRelease)
-
 	fmt.Println("Server started on port " + os.Getenv("PORT"))
-	http.ListenAndServe(":"+os.Getenv("PORT"), router)
+	http.ListenAndServe(":"+os.Getenv("PORT"), routes.BuildRouter())
 }
