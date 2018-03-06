@@ -11,15 +11,15 @@ import (
 	"../models"
 )
 
-func GetReservation(reservationId string) (models.Reservation, error) {
+func GetReservation(reservationId string, apiKey string, clientId string) (models.Reservation, error) {
 	client := &http.Client{}
 	url := fmt.Sprintf("%s/%s/%s?site=AR&channel=WEB", os.Getenv("BASSET_API"), "reservations", reservationId)
 
 	request, err := http.NewRequest("GET", url, nil)
 
 	request.Header = map[string][]string{
-		"X-Api-Key":   {os.Getenv("X_API_KEY")},
-		"x-client-id": {os.Getenv("X_CLIENT_ID")},
+		"X-Api-Key":   {apiKey},
+		"x-client-id": {clientId},
 	}
 
 	response, err := client.Do(request)

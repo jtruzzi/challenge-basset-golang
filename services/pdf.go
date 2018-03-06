@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 
 	"../models"
@@ -21,7 +20,7 @@ type MandrillTemplateResponse struct {
 	PublishCode string `json:"publish_code"`
 }
 
-func GenerateConfirmationPDF(reservation models.Reservation, product models.Product) (models.Attachment, error) {
+func GenerateConfirmationPDF(reservation models.Reservation, product models.Product, client models.Client) (models.Attachment, error) {
 	pdfGenerator, _ := wkhtmltopdf.NewPDFGenerator()
 	pdfGenerator.Dpi.Set(600)
 	pdfGenerator.NoCollate.Set(false)
@@ -32,12 +31,14 @@ func GenerateConfirmationPDF(reservation models.Reservation, product models.Prod
 
 	buffer := new(bytes.Buffer)
 
-	err := issuedTicketHeader.Execute(buffer, map[string]interface{}{
-		"Header":      fetchTemplate("issued-ticket-pdf-header"),
-		"Footer":      fetchTemplate("issued-ticket-pdf-footer"),
+	templateData := map[string]interface{}{
+		"Header":      fetchTemplate("issued-ticket-pdf-header", client.MandrillApiKey),
+		"Footer":      fetchTemplate("issued-ticket-pdf-footer", client.MandrillApiKey),
 		"Product":     product,
 		"Reservation": reservation,
-	})
+	}
+
+	err := issuedTicketHeader.Execute(buffer, templateData)
 
 	if err != nil {
 		log.Println(err)
@@ -58,9 +59,9 @@ func GenerateConfirmationPDF(reservation models.Reservation, product models.Prod
 	}, nil
 }
 
-func fetchTemplate(name string) template.HTML {
+func fetchTemplate(name string, mandrillApiKey string) template.HTML {
 	client := &http.Client{}
-	var body = []byte(`{"key":"` + os.Getenv("BASSET_MANDRILL_API_KEY") + `", "name": "` + name + `"}`)
+	var body = []byte(`{"key":"` + mandrillApiKey + `", "name": "` + name + `"}`)
 
 	request, err := http.NewRequest("POST", "https://mandrillapp.com/api/1.0/templates/info.json", bytes.NewBuffer(body))
 	response, err := client.Do(request)

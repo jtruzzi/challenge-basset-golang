@@ -11,7 +11,11 @@ import (
 )
 
 func CreateTicketRelease(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	reservation, err := services.GetReservation(ps.ByName("reservationId"))
+
+	client, err := models.GetClient(r.Header.Get("x-client-id"))
+	apiKey := r.Header.Get("X-Api-Key")
+
+	reservation, err := services.GetReservation(ps.ByName("reservationId"), apiKey, client.ClientId)
 	if err != nil {
 		panic(err)
 	}
@@ -25,10 +29,10 @@ func CreateTicketRelease(w http.ResponseWriter, r *http.Request, ps httprouter.P
 			break
 		}
 
-		flightReservation, err2 := services.GetFlightReservation(product.ReservationId)
-		if err2 != nil {
+		flightReservation, err := services.GetFlightReservation(product.ReservationId, apiKey, client.ClientId)
+		if err != nil {
 			panic(err)
-			return
+			break
 		}
 
 		if flightReservation.HasIssuedTicket() {
@@ -41,7 +45,7 @@ func CreateTicketRelease(w http.ResponseWriter, r *http.Request, ps httprouter.P
 		return
 	}
 
-	reponse, err := services.SendEmailConfirmation(reservation, products, resend)
+	reponse, err := services.SendEmailConfirmation(reservation, products, resend, client)
 	if err != nil {
 		json.NewEncoder(w).Encode(err)
 	}
