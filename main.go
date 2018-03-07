@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"./models"
 	"./routes"
+	"./db"
 	"github.com/joho/godotenv"
 	"net/http"
 )
@@ -16,7 +16,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	models.InitAwsServices()
+	db.InitDB()
 
 	fmt.Println("Server started on port " + os.Getenv("PORT"))
 	http.ListenAndServe(":"+os.Getenv("PORT"), routes.BuildRouter())

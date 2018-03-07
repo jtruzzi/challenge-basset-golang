@@ -5,6 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"log"
+	"../db"
 )
 
 type Client struct {
@@ -15,7 +16,7 @@ type Client struct {
 
 // GetClient: Get client information and configuration in DB
 func GetClient(clientId string) (Client, error) {
-	result, err := db.GetItem(&dynamodb.GetItemInput{
+	result, err := db.DynamoDB.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String("Client"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"ClientId": {

@@ -3,10 +3,10 @@ package models
 import (
 	"fmt"
 	"log"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"../db"
 )
 
 type TicketRelease struct {
@@ -16,7 +16,7 @@ type TicketRelease struct {
 }
 
 func GetTicketRelease(itemId string) (TicketRelease, error) {
-	result, err := db.GetItem(&dynamodb.GetItemInput{
+	result, err := db.DynamoDB.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String("TicketRelease"),
 		Key: map[string]*dynamodb.AttributeValue{
 			"ItemId": {
@@ -49,7 +49,7 @@ func (item *TicketRelease) Save() error {
 		TableName: aws.String("TicketRelease"),
 	}
 
-	_, err = db.PutItem(input)
+	_, err = db.DynamoDB.PutItem(input)
 
 	if err != nil {
 		fmt.Println("Got error calling PutItem:")

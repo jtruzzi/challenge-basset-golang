@@ -18,7 +18,7 @@ func SaveAttachmentToS3(attachment models.Attachment) string {
 	// TODO: Upload to S3
 
 	var awsSession, _ = session.NewSession(&aws.Config{
-		Region: aws.String("sa-east-1"),
+		Region: aws.String("us-east-1"),
 	})
 
 	uploader := s3manager.NewUploader(awsSession)
@@ -38,7 +38,7 @@ func SaveAttachmentToS3(attachment models.Attachment) string {
 
 func GetAttachmentFromS3(location string) (models.Attachment, error) {
 	var awsSession, _ = session.NewSession(&aws.Config{
-		Region: aws.String("sa-east-1"),
+		Region: aws.String("us-east-1"),
 	})
 	s3Svc := s3.New(awsSession)
 
