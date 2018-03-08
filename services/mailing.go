@@ -14,12 +14,13 @@ func SendEmailConfirmation(reservation models.Reservation, resend bool, client m
 	pingErr := mandrill.Ping()
 	if pingErr != nil {
 		log.Panic(pingErr)
+		return []*mandrill.SendResult{}, errors.New("Couldn't connect to mailing provider")
 	}
 
 	var attachments []*mandrill.Attachment
 	for _, product := range reservation.Products {
-		attachment := generateAttachment(product, reservation, resend, client)
-		if attachment != nil {
+		attachment, err := generateAttachment(product, reservation, resend, client)
+		if err != nil && attachment != nil {
 			attachments = append(attachments, attachment)
 		}
 	}
@@ -45,23 +46,27 @@ func SendEmailConfirmation(reservation models.Reservation, resend bool, client m
 }
 
 // generateAttachments: Generates mandrill attachment based on a given product
-func generateAttachment(product models.Product, reservation models.Reservation, resend bool, client models.Client) *mandrill.Attachment {
+func generateAttachment(product models.Product, reservation models.Reservation, resend bool, client models.Client) (*mandrill.Attachment, error) {
 	ticketRelease, _ := models.GetTicketRelease(product.ItemId)
 	if resend == true || ticketRelease.Released != true {
 		var attachment models.Attachment
-
+		var err error
 		if ticketRelease.S3Url != "" {
-			attachment, _ = GetAttachmentFromS3(ticketRelease.S3Url)
+			attachment, err = GetAttachmentFromS3(ticketRelease.S3Url)
 		} else {
-			attachment, _ = GenerateConfirmationPDF(reservation, product, client)
+			attachment, err = GenerateConfirmationPDF(reservation, product, client)
 			ticketRelease.S3Url = SaveAttachmentToS3(attachment)
 			ticketRelease.Released = true
 			ticketRelease.Save()
 		}
 
-		return generateMandrillAttachment(attachment)
+		if err != nil {
+			return &mandrill.Attachment{}, err
+		}
+
+		return generateMandrillAttachment(attachment), nil
 	}
-	return nil
+	return nil, errors.New("Couldn't generate attachment")
 }
 
 // generateMandrillAttachment: Transform a basset attachment into a mandrill attachment

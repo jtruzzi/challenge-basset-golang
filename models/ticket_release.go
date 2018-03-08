@@ -1,7 +1,6 @@
 package models
 
 import (
-	"fmt"
 	"log"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -52,8 +51,8 @@ func (item *TicketRelease) Save() error {
 	_, err = db.DynamoDB.PutItem(input)
 
 	if err != nil {
-		fmt.Println("Got error calling PutItem:")
-		fmt.Println(err.Error())
+		log.Println("Got error calling PutItem:")
+		log.Println(err.Error())
 		return err
 	}
 

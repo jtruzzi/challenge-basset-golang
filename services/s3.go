@@ -28,7 +28,7 @@ func SaveAttachmentToS3(attachment models.Attachment) string {
 		Body:   bytes.NewReader(attachment.Content),
 	})
 	if err != nil {
-		fmt.Println("Error uploading file", err)
+		log.Println("Error uploading file", err)
 		return ""
 	}
 

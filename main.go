@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -12,12 +11,14 @@ import (
 )
 
 func main() {
+	log.SetOutput(os.Stdout)
+
 	if err := godotenv.Load(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
 
 	db.InitDB()
 
-	fmt.Println("Server started on port " + os.Getenv("PORT"))
+	log.Println("Server started on port " + os.Getenv("PORT"))
 	http.ListenAndServe(":"+os.Getenv("PORT"), routes.BuildRouter())
 }

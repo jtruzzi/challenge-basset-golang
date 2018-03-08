@@ -1,13 +1,13 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 
 	"../models"
 	"../services"
 	"github.com/julienschmidt/httprouter"
+	"log"
 )
 
 // CreateTicketRelease: Endpoint for releasing product tickets to the user by email
@@ -19,17 +19,20 @@ func CreateTicketRelease(w http.ResponseWriter, r *http.Request, ps httprouter.P
 	reservation, err := services.GetReservationWithFlightReservations(ps.ByName("reservationId"), apiKey, client.ClientId)
 
 	if err != nil {
+		NewAPIError(&APIError{false, err.Error(), http.StatusInternalServerError}, w)
 		return
 	}
 
 	if len(reservation.Products) == 0 {
+		NewAPIError(&APIError{false, "Product not found", http.StatusInternalServerError}, w)
 		return
 	}
 
 	response, err := services.SendEmailConfirmation(reservation, resend, client)
 	if err != nil {
-		json.NewEncoder(w).Encode(err)
+		log.Println("[API ERROR]: SendEmailConfirmation response: ", response)
+		NewAPIError(&APIError{false, "Problem sending email", http.StatusInternalServerError}, w)
 		return
 	}
-	json.NewEncoder(w).Encode(response)
+	NewAPIResponse(&APIResponse{true, "Tickets released"}, w, http.StatusOK)
 }

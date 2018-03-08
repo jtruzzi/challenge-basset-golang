@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"../models"
+	"errors"
 )
 
 // GetReservationWithFlightReservations: Fetches Reservation, including FlightReservation in products
@@ -18,6 +19,11 @@ func GetReservationWithFlightReservations(reservationId string, apiKey string, c
 	if err != nil {
 		log.Println("Couldn't fetch reservation")
 		return reservation, err
+	}
+
+	if len(reservation.Products) == 0 {
+		log.Println("Couldn't get reservation products")
+		return reservation, errors.New("Couldn't get reservation products")
 	}
 
 	for index, _ := range reservation.Products {
@@ -38,6 +44,7 @@ func GetReservationWithFlightReservations(reservationId string, apiKey string, c
 			product.FlightReservation = flightReservation
 		}
 	}
+
 	return reservation, nil
 }
 

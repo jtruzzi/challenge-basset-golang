@@ -1,0 +1,10 @@
+basset-mailing-gateway:
+  image: 264205089826.dkr.ecr.us-east-1.amazonaws.com/basset-mailing-gateway
+  cpu_shares: 100
+  mem_limit: 134217728
+  ports:
+    - "80:5000"
+  entrypoint:
+    - "/app/main"
+    - "-D"
+    - "FOREGROUND"
