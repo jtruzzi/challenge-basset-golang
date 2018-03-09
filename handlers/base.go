@@ -9,6 +9,7 @@ import (
 type APIResponse struct {
 	Success bool   `json:"success"`
 	Message string `json:"message,omitempty"`
+	Status  int    `json:"status"`
 }
 
 type APIError struct {
@@ -28,9 +29,9 @@ func NewAPIError(e *APIError, w http.ResponseWriter) {
 	}
 }
 
-func NewAPIResponse(res *APIResponse, w http.ResponseWriter, code int) {
+func NewAPIResponse(res *APIResponse, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.WriteHeader(code)
+	w.WriteHeader(res.Status)
 
 	err := json.NewEncoder(w).Encode(res)
 	if err != nil {

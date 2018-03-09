@@ -20,7 +20,7 @@ func SendEmailConfirmation(reservation models.Reservation, resend bool, client m
 	var attachments []*mandrill.Attachment
 	for _, product := range reservation.Products {
 		attachment, err := generateAttachment(product, reservation, resend, client)
-		if err != nil && attachment != nil {
+		if err == nil {
 			attachments = append(attachments, attachment)
 		}
 	}
@@ -51,7 +51,7 @@ func generateAttachment(product models.Product, reservation models.Reservation, 
 	if resend == true || ticketRelease.Released != true {
 		var attachment models.Attachment
 		var err error
-		if ticketRelease.S3Url != "" {
+		if len(ticketRelease.S3Url) != 0 {
 			attachment, err = GetAttachmentFromS3(ticketRelease.S3Url)
 		} else {
 			attachment, err = GenerateConfirmationPDF(reservation, product, client)

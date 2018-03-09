@@ -34,5 +34,5 @@ func CreateTicketRelease(w http.ResponseWriter, r *http.Request, ps httprouter.P
 		NewAPIError(&APIError{false, err.Error(), http.StatusMethodNotAllowed}, w)
 		return
 	}
-	NewAPIResponse(&APIResponse{true, "Tickets released"}, w, http.StatusOK)
+	NewAPIResponse(&APIResponse{true, "Tickets released", http.StatusOK}, w)
 }

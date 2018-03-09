@@ -2,17 +2,15 @@ package services
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"log"
-	"net/url"
-
 	"../models"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"os"
+	"path/filepath"
 )
 
 func SaveAttachmentToS3(attachment models.Attachment) string {
@@ -24,7 +22,7 @@ func SaveAttachmentToS3(attachment models.Attachment) string {
 
 	uploader := s3manager.NewUploader(awsSession)
 	result, err := uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String("basset-mailing-gateway"),
+		Bucket: aws.String("mailing-gateway"),
 		Key:    aws.String(attachment.Path),
 		Body:   bytes.NewReader(attachment.Content),
 	})
@@ -43,12 +41,11 @@ func GetAttachmentFromS3(location string) (models.Attachment, error) {
 	})
 	s3Svc := s3.New(awsSession)
 
-	u, _ := url.Parse(location)
-	fmt.Printf("proto: %q, bucket: %q, key: %q", u.Scheme, u.Host, u.Path)
+	fileName := filepath.Base(location)
 
 	result, err := s3Svc.GetObject(&s3.GetObjectInput{
-		Bucket: aws.String("basset-mailing-gateway"),
-		Key:    aws.String(u.Path),
+		Bucket: aws.String("mailing-gateway"),
+		Key:    aws.String(fileName),
 	})
 
 	if err != nil {
@@ -60,7 +57,7 @@ func GetAttachmentFromS3(location string) (models.Attachment, error) {
 
 	return models.Attachment{
 		Mime:    "application/pdf",
-		Path:    u.Path,
+		Path:    fileName,
 		Content: content,
 	}, nil
 }
