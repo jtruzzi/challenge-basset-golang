@@ -24,14 +24,14 @@ func CreateTicketRelease(w http.ResponseWriter, r *http.Request, ps httprouter.P
 	}
 
 	if len(reservation.Products) == 0 {
-		NewAPIError(&APIError{false, "Product not found", http.StatusInternalServerError}, w)
+		NewAPIError(&APIError{false, "Product not found", http.StatusNotFound}, w)
 		return
 	}
 
 	response, err := services.SendEmailConfirmation(reservation, resend, client)
 	if err != nil {
 		log.Println("[API ERROR]: SendEmailConfirmation response: ", response)
-		NewAPIError(&APIError{false, "Problem sending email", http.StatusInternalServerError}, w)
+		NewAPIError(&APIError{false, err.Error(), http.StatusMethodNotAllowed}, w)
 		return
 	}
 	NewAPIResponse(&APIResponse{true, "Tickets released"}, w, http.StatusOK)

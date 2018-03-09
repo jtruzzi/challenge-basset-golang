@@ -12,13 +12,14 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"os"
 )
 
 func SaveAttachmentToS3(attachment models.Attachment) string {
 	// TODO: Upload to S3
 
 	var awsSession, _ = session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1"),
+		Region: aws.String(os.Getenv("AWS_S3_REGION")),
 	})
 
 	uploader := s3manager.NewUploader(awsSession)
@@ -38,7 +39,7 @@ func SaveAttachmentToS3(attachment models.Attachment) string {
 
 func GetAttachmentFromS3(location string) (models.Attachment, error) {
 	var awsSession, _ = session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1"),
+		Region: aws.String(os.Getenv("AWS_S3_REGION")),
 	})
 	s3Svc := s3.New(awsSession)
 
