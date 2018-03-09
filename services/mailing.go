@@ -26,8 +26,7 @@ func SendEmailConfirmation(reservation models.Reservation, resend bool, client m
 	}
 
 	// TODO: Uncomment line to use actual reservation email
-	//email := reservation.Contact.Email
-	email := "julio.truzzi@gmail.com"
+	email := reservation.Contact.Email
 	if len(attachments) > 0 {
 		message := mandrill.NewMessageTo(email, "")
 

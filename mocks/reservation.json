@@ -1,0 +1,77 @@
+{
+  "id": "752690706",
+  "products": [
+    {
+      "reservation_id": "e5ee190c-d214-4bd8-a5f2-e255b1601b65",
+      "item_id": "26af46ef-ca50-4d36-99a3-1a8e6622cb6c_da4754d5-1466-44b7-91f8-ee7cc06634c2",
+      "type": "FLIGHT",
+      "status": "ISSUED",
+      "passengers": [
+        {
+          "type": "ADT",
+          "firstname": "JULIO GUILLERMO",
+          "lastname": "TRUZZI",
+          "gender": "M",
+          "birth": "03/06/1983",
+          "document": {
+            "type": "DNI",
+            "number": "29826475"
+          },
+          "nationality": "ARG"
+        }
+      ],
+      "fare": {
+        "currency": "ARS",
+        "conversion_rate": 0,
+        "total": 6807.14342,
+        "total_tax": 3335.6,
+        "base_fare": 2519,
+        "extra_taxes": [
+          {
+            "total": 952.5434199999999,
+            "type": "OPERATING_COST"
+          }
+        ]
+      }
+    }
+  ],
+  "client_id": "41df5118-4cd6-453c-a9ae-34ef444c71bd",
+  "site": "AR",
+  "channel": "WEB",
+  "contact": {
+    "language": "es",
+    "email": "julio.truzzi@basset.la",
+    "telephone": {
+      "type": "M",
+      "country_code": "54",
+      "area_code": "11",
+      "number": "2914716931"
+    }
+  },
+  "fiscal_identification": {
+    "type": "CUIL",
+    "number": "20298264758"
+  },
+  "created_at": "2018-02-20T12:23:32.729954884Z",
+  "updated_at": "2018-02-20T19:11:29.29651191Z",
+  "activity_logs": [
+    {
+      "product_id": "e5ee190c-d214-4bd8-a5f2-e255b1601b65",
+      "action": "ADD",
+      "product": "FLIGHT",
+      "previous_status": "NONE",
+      "new_status": "BOOKED",
+      "user_id": "",
+      "date_time": "2018-02-20T12:23:32.729959025Z"
+    },
+    {
+      "product_id": "e5ee190c-d214-4bd8-a5f2-e255b1601b65",
+      "action": "UPDATE",
+      "product": "FLIGHT",
+      "previous_status": "BOOKED",
+      "new_status": "ISSUED",
+      "user_id": "",
+      "date_time": "2018-02-20T19:11:29.29650955Z"
+    }
+  ]
+}
